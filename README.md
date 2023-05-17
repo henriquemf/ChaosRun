@@ -1,6 +1,6 @@
 # Chaos Run
 
-##Integrantes:
+## Integrantes:
 
 - Henrique Martinelli Frezzatti
 - Nicolas Maciel Queiroga
