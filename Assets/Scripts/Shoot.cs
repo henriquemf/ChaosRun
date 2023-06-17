@@ -45,22 +45,43 @@ public class Shoot : MonoBehaviour
         {
             bulletPrefab = StatsManager.purpleStaticPrefabs[StatsManager.playerShootStyle];
         }
-        if (Input.GetKeyDown(KeyCode.RightArrow) && canShoot)
-        {
-            animator.SetTrigger("shoot");
-            shootSound.Play();
-            Instantiate(bulletPrefab, shootingPoint.position, shootingPoint.rotation);
-            StartCoroutine(ShootCooldown());
-        }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow)  && canShoot)
-        {
-            flip();
-            animator.SetTrigger("shoot");
-            shootSound.Play();
-            Instantiate(bulletPrefab, shootingPoint.position, shootingPoint.rotation);
-            Invoke("flip", 0.1f);
-            StartCoroutine(ShootCooldown());
-        }
+        // if (Input.GetKeyDown(KeyCode.RightArrow) && canShoot)
+        // {
+        //     animator.SetTrigger("shoot");
+        //     shootSound.Play();
+        //     Instantiate(bulletPrefab, shootingPoint.position, shootingPoint.rotation);
+        //     StartCoroutine(ShootCooldown());
+        // }
+        // else if (Input.GetKeyDown(KeyCode.LeftArrow)  && canShoot)
+        // {
+        //     flip();
+        //     animator.SetTrigger("shoot");
+        //     shootSound.Play();
+        //     Instantiate(bulletPrefab, shootingPoint.position, shootingPoint.rotation);
+        //     Invoke("flip", 0.1f);
+        //     StartCoroutine(ShootCooldown());
+        // }
+        if (Input.touchCount > 0)
+		{
+			Touch touch = Input.GetTouch(0);
+
+			if ((touch.position.x > Screen.width / 2) && canShoot)
+			{
+				animator.SetTrigger("shoot");
+                shootSound.Play();               
+                Instantiate(bulletPrefab, shootingPoint.position, shootingPoint.rotation);
+                StartCoroutine(ShootCooldown());
+			}
+            else if ((touch.position.x < Screen.width / 2) && canShoot)
+            {
+                flip();
+                animator.SetTrigger("shoot");
+                shootSound.Play();
+                Instantiate(bulletPrefab, shootingPoint.position, shootingPoint.rotation);
+                Invoke("flip", 0.1f);
+                StartCoroutine(ShootCooldown());
+            }
+		}
     }
 
     private void flip()
