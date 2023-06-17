@@ -135,7 +135,6 @@ public class Player : MonoBehaviour
     public void TakeDamage (float damage)
     {
         health = health - damage;
-        Debug.Log("Current PLAYER health: " + health);
         StartCoroutine(cameraShake.Shake(.3f, .3f));
         hurtSound.Play();
         animator.SetTrigger("hit");

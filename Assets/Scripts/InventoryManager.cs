@@ -103,6 +103,7 @@ public class InventoryManager : MonoBehaviour
         {
             // Debug.Log("Not enough sprites in the list");
         }
+        AssignImagesAndTexts();
     }
 
     public void AssignImagesAndTexts()

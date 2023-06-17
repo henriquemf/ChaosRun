@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Advertisements;
 using TMPro;
+using System.Collections;
  
 public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowListener
 {
@@ -11,6 +12,17 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
     [SerializeField] string _iOSAdUnitId = "Rewarded_iOS";
     string _adUnitId = null; // This will remain null for unsupported platforms
  
+    private bool CR_running = false;
+
+    IEnumerator Cooldown(float time)
+    {
+        CR_running = true;
+        yield return new WaitForSeconds(time);
+        this.LoadAd();
+        CR_running = false;
+        Debug.Log("Cooldown ended");
+    }
+
     void Awake()
     {   
         // Get the Ad Unit ID for the current platform:
@@ -39,6 +51,7 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
  
         if (adUnitId.Equals(_adUnitId))
         {
+            _showAdButton.onClick.RemoveAllListeners();
             // Configure the button to call the ShowAd() method when clicked:
             _showAdButton.onClick.AddListener(ShowAd);
             // Enable the button for users to click:
@@ -64,6 +77,8 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
             // Grant a reward.
             coinsText.text = StatsManager.FormatNumber(GameOver.runCoins);
             // Debug.Log("You've gained 100 coins!");
+            if (CR_running == false)
+                StartCoroutine(Cooldown(1));
         }
     }
  

@@ -14,9 +14,12 @@ public class GameOver : MonoBehaviour
     public TextMeshProUGUI distanceText;
     public AudioSource gameOverSound;
     public AudioSource gameMusic;
+    public RewardedAdsButton rewardedAdsButton;
 
     private void Start()
     {
+        rewardedAdsButton.LoadAd();
+        
         runCoins = StatsManager.runCoins;
         runDistance = StatsManager.runDistance;
         playerCoins = PlayerPrefs.GetInt("Coins");

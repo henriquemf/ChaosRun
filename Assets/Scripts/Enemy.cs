@@ -133,8 +133,8 @@ public class Enemy : MonoBehaviour
         }
 
         // debug log the transform.position.x of the player and the enemy
-        if (gameObject.tag == "widow")
-            Debug.Log("Player: " + target.position.x + " Enemy: " + transform.position.x + " Dist: " + (transform.position.x >= target.position.x));
+        //if (gameObject.tag == "widow")
+            //Debug.Log("Player: " + target.position.x + " Enemy: " + transform.position.x + " Dist: " + (transform.position.x >= target.position.x));
 
         // if player is to the left of the widow, destroy the player
         if (transform.position.x >= target.position.x && gameObject.tag == "widow")
@@ -146,7 +146,6 @@ public class Enemy : MonoBehaviour
         // if dist between player and enemy is less than min_attack_distance, attack
         if (dist <= enemy.min_attack_distance && canTakeDamage && enemy.health > 0 && Mathf.Abs(target.position.y - transform.position.y) < 1f)
         {
-            Debug.Log("Player hit " + (dist <= enemy.min_attack_distance));
             currSpeed = enemy.speed;
             enemy.speed = 0;
             // if (gameObject.tag == "bomb")
