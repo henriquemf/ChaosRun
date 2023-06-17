@@ -29,8 +29,14 @@ public class Player : MonoBehaviour
     private CameraShake cameraShake;
     
     //Extra Jump
-    public int maxJumpValue;
     int maxJump;
+
+    //Touch Variables
+    public int swipeThreshold = 200;
+    public float swipeTimeThreshold = 0.2f;
+    private Vector2 startPosition;
+    private float startTime;
+    private bool checkTouch = true;
 
     private void Start()
     {
@@ -38,31 +44,63 @@ public class Player : MonoBehaviour
         health = PlayerPrefs.GetInt("Health");
         moveSpeed = 1.5f;
         rb = GetComponent<Rigidbody2D>();
-        maxJump = maxJumpValue;
+        maxJump = 2;
         lastPosition = GetComponent<Transform>().position;
     }
 
     private void Update()
     {
         isGrounded = Physics2D.OverlapCircle(GroundCheck.position, CheckRadius, WhatIsGround);
-        if (Input.GetKeyDown(KeyCode.UpArrow) && maxJump > 0)
-        {
-            maxJump--;
-            Jump();
-        }
-        else if (Input.GetKeyDown(KeyCode.UpArrow) && maxJump == 0 && isGrounded)
-        {
-            Jump();
-        }
+        if (Input.touchCount > 0)
+		{
+			Touch touch = Input.GetTouch(0);
 
-        if (Input.GetKeyDown(KeyCode.DownArrow) && isGrounded)
-        {
-            Crouch();
-        }
+			switch (touch.phase)
+			{
+				case TouchPhase.Began:
+					startPosition = touch.position;
+					startTime = Time.time;
+					break;
+
+				case TouchPhase.Moved:
+					Vector2 swipeDelta = touch.position - startPosition;
+					float swipeDistance = swipeDelta.y;
+
+					if (Mathf.Abs(swipeDistance) > swipeThreshold)
+                    {
+                        float swipeTime = Time.time - startTime;
+
+                        if (swipeDistance > 0 && swipeTime < swipeTimeThreshold)
+                        {
+                            if (isGrounded)
+                            {
+                                Jump();
+                            }
+                            else if (maxJump > 0 && checkTouch)
+                            {
+                                maxJump--;
+                                Jump();
+                                checkTouch = false;
+                            }
+                        }
+                        else if (swipeDistance < 0 && swipeTime < swipeTimeThreshold && isGrounded && checkTouch)
+                        {
+                            Crouch();
+                            checkTouch = false;
+                        }
+                    }
+
+					break;
+
+                case TouchPhase.Ended:
+                    checkTouch = true;
+                    break;
+			}
+		}
         
         if (isGrounded)
         {
-            maxJump = maxJumpValue;
+            maxJump = 2;
         }
 
         animator.SetBool("isWalking", true);
