@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Advertisements;
+using TMPro;
  
 public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowListener
 {
+    public TextMeshProUGUI coinsText;
     [SerializeField] Button _showAdButton;
     [SerializeField] string _androidAdUnitId = "Rewarded_Android";
     [SerializeField] string _iOSAdUnitId = "Rewarded_iOS";
@@ -19,21 +21,21 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
         #endif
 
         // Disable the button until the ad is ready to show:
-        _showAdButton.interactable = false;
+        _showAdButton.interactable = true;
     }
  
     // Call this public method when you want to get an ad ready to show.
     public void LoadAd()
     {
         // IMPORTANT! Only load content AFTER initialization (in this example, initialization is handled in a different script).
-        // Debug.Log("Loading Ad: " + _adUnitId);
+        Debug.Log("Loading Ad: " + _adUnitId);
         Advertisement.Load(_adUnitId, this);
     }
  
     // If the ad successfully loads, add a listener to the button and enable it:
     public void OnUnityAdsAdLoaded(string adUnitId)
     {
-        // Debug.Log("Ad Loaded: " + adUnitId);
+        Debug.Log("Ad Loaded: " + adUnitId);
  
         if (adUnitId.Equals(_adUnitId))
         {
@@ -58,8 +60,9 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
     {
         if (adUnitId.Equals(_adUnitId) && showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
         {
-            // Debug.Log("Unity Ads Rewarded Ad Completed");
+            Debug.Log("Unity Ads Rewarded Ad Completed");
             // Grant a reward.
+            coinsText.text = StatsManager.FormatNumber(GameOver.runCoins);
             // Debug.Log("You've gained 100 coins!");
         }
     }
@@ -67,13 +70,13 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
     // Implement Load and Show Listener error callbacks:
     public void OnUnityAdsFailedToLoad(string adUnitId, UnityAdsLoadError error, string message)
     {
-        // Debug.Log($"Error loading Ad Unit {adUnitId}: {error.ToString()} - {message}");
+        Debug.Log($"Error loading Ad Unit {adUnitId}: {error.ToString()} - {message}");
         // Use the error details to determine whether to try to load another ad.
     }
  
     public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
     {
-        // Debug.Log($"Error showing Ad Unit {adUnitId}: {error.ToString()} - {message}");
+        Debug.Log($"Error showing Ad Unit {adUnitId}: {error.ToString()} - {message}");
         // Use the error details to determine whether to try to load another ad.
     }
  

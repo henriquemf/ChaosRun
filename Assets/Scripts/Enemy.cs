@@ -20,7 +20,7 @@ public class Enemy : MonoBehaviour
     public Animator animator;
     public float health = 100;
     public float shootTimeout = 8f;
-    public AudioSource bloodSound;
+    private AudioSource bloodSound;
 
     private bool canShoot = true;
     private Transform target;
@@ -28,12 +28,19 @@ public class Enemy : MonoBehaviour
     private EnemyStats enemy;
     private bool canTakeDamage = true;
     private float dist;
+    private float height;
     private float currSpeed;
     private float y_init;
     private CameraShake cameraShake;
+    private EnemySpawner enemySpawner;
+    private StatsManager statsManager;
+    private LevelChanger levelChanger;
 
     void Start()
     {
+        levelChanger = GameObject.Find("Level").GetComponent<LevelChanger>();
+        statsManager = GameObject.Find("StatsManager").GetComponent<StatsManager>();
+        bloodSound = GameObject.Find("BloodSFX").GetComponent<AudioSource>();
         cameraShake = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraShake>();
         y_init = transform.position.y;
         player = GameObject.FindGameObjectWithTag("Player");
@@ -44,51 +51,47 @@ public class Enemy : MonoBehaviour
         switch (gameObject.tag)
         {
             case "archer":
-                enemy.health = 10 + StatsManager.runDistance/10f;
-                enemy.min_attack_distance = 6f;
+                enemy.health = 2 + StatsManager.runDistance/30f;
+                enemy.min_attack_distance = 3f;
                 enemy.speed = 0;
                 enemy.has_range_attack = false;
                 enemy.range_attack_distance = 6f;
-                enemy.damage = 20 + StatsManager.runDistance/10f;
+                enemy.damage = 3 + StatsManager.runDistance/30f;
                 break;
             case "widow":
-                enemy.health = 6000000000000;
-                enemy.min_attack_distance = 5f;
-                enemy.speed = StatsManager.playerMSpeed*1.1f;
+                enemy.health = Mathf.Infinity;
+                enemy.min_attack_distance = 3f;
+                enemy.speed = StatsManager.playerMSpeed*1.3f;
                 enemy.has_range_attack = true;
                 enemy.range_attack_distance = 20f;
-                enemy.damage = 20 + StatsManager.runDistance/10f;
+                enemy.damage = 10 + StatsManager.runDistance/30f;
                 break;
             case "mush":
-                enemy.health = 10 + StatsManager.runDistance/10f;
-                enemy.min_attack_distance = 7f;
+                enemy.health = 2 + StatsManager.runDistance/30f;
+                enemy.min_attack_distance = 3f;
                 enemy.speed = 0;
                 enemy.has_range_attack = false;
                 enemy.range_attack_distance = 0f;
-                enemy.damage = 20 + StatsManager.runDistance/10f;
+                enemy.damage = 3 + StatsManager.runDistance/30f;
                 break;
             case "bomb":
-                enemy.health = 1 + StatsManager.runDistance/10f;
-                enemy.min_attack_distance = 4f;
+                enemy.health = 1 + StatsManager.runDistance/30f;
+                enemy.min_attack_distance = 3f;
                 enemy.speed = 0;
                 enemy.has_range_attack = false;
                 enemy.range_attack_distance = 4f;
-                enemy.damage = 80 + StatsManager.runDistance/10f;
+                enemy.damage = 4 + StatsManager.runDistance/30f;
                 break;
         }
+        currSpeed = enemy.speed;
     }
 
     void Update()
     {
-        enemy.health += StatsManager.runDistance/10f;
-        enemy.damage += StatsManager.runDistance/10f;
-
         if (gameObject.tag == "widow")
         {
-            enemy.speed = StatsManager.playerMSpeed*1.1f;
+            currSpeed = StatsManager.playerMSpeed*1.1f;
         }
-        
-        currSpeed = enemy.speed;
 
         if (StatsManager.playerShootLevel == 0)
         {
@@ -106,8 +109,10 @@ public class Enemy : MonoBehaviour
         {
             bulletPrefab = StatsManager.purpleStaticPrefabs[StatsManager.playerShootStyle];
         }
+
         // dist between player and enemy
         dist = Vector3.Distance(target.position, transform.position);
+        height = transform.position.y;
 
         // always follow player with the enemy.speed value but always on y_init
         transform.position = new Vector3(transform.position.x + enemy.speed * Time.deltaTime, y_init, transform.position.z);
@@ -116,114 +121,88 @@ public class Enemy : MonoBehaviour
 
         // flip enemy sprite
         if (target.position.x < transform.position.x)
-        {
             transform.localScale = new Vector3(-1, 1, 1);
-        }
         else
-        {
             transform.localScale = new Vector3(1, 1, 1);
+
+        // if this enemy is to the left of the player, destroy this enemy
+        if (transform.position.x < target.position.x - 20 && gameObject.tag != "widow")
+        {
+            Destroy(gameObject);
+            EnemySpawner.mobCnt--;
+        }
+
+        // debug log the transform.position.x of the player and the enemy
+        if (gameObject.tag == "widow")
+            Debug.Log("Player: " + target.position.x + " Enemy: " + transform.position.x + " Dist: " + (transform.position.x >= target.position.x));
+
+        // if player is to the left of the widow, destroy the player
+        if (transform.position.x >= target.position.x && gameObject.tag == "widow")
+        {
+            playerScript.TakeDamage(10000);
+            StartCoroutine(ResetDamageCooldown());
         }
 
         // if dist between player and enemy is less than min_attack_distance, attack
-        if (dist <= enemy.min_attack_distance && canTakeDamage && enemy.health > 0)
+        if (dist <= enemy.min_attack_distance && canTakeDamage && enemy.health > 0 && Mathf.Abs(target.position.y - transform.position.y) < 1f)
         {
             Debug.Log("Player hit " + (dist <= enemy.min_attack_distance));
             currSpeed = enemy.speed;
             enemy.speed = 0;
-            if (gameObject.tag == "bomb")
-            {
+            // if (gameObject.tag == "bomb")
+            // {
+            //     animator.SetTrigger("attack");
+            //     playerScript.TakeDamage(enemy.damage);
+            //     StartCoroutine(ResetDamageCooldown());
+            //     Invoke("DestroyObject", 1.0f);
+            //     EnemySpawner.mobCnt--;
+            // }
+            // else
+            // {
                 animator.SetTrigger("attack");
                 playerScript.TakeDamage(enemy.damage);
                 StartCoroutine(ResetDamageCooldown());
-                Invoke("DestroyObject", 1.0f);
-            }
-            else
-            {
-                animator.SetTrigger("attack");
-                playerScript.TakeDamage(enemy.damage);
-                StartCoroutine(ResetDamageCooldown());
-            }
+            // }
             Invoke("ResetSpeed", 1f);
         }
-        if (dist > enemy.min_attack_distance && dist <= enemy.range_attack_distance && enemy.has_range_attack && canShoot)
+        if (dist > enemy.min_attack_distance && dist <= enemy.range_attack_distance && enemy.has_range_attack && canShoot && Mathf.Abs(target.position.y - transform.position.y) < 1f)
         {
             animator.SetTrigger("shoot");
             Instantiate(bulletPrefab, shootingPoint.position, shootingPoint.rotation);
             StartCoroutine(ShootCooldown());
         }
-        if (dist <= 1f && gameObject.tag == "widow")
+        if (dist <= 0.4f && gameObject.tag == "widow")
         {
             animator.SetTrigger("attack");
             playerScript.TakeDamage(10000);
             StartCoroutine(ResetDamageCooldown());
         }
-        // else if (gameObject.tag == "widow" && dist <= enemy.range_attack_distance && dist > enemy.min_attack_distance && canShoot)
-        // {
-        //     animator.SetTrigger("shoot");
-        //     Instantiate(bulletPrefab, shootingPoint.position, shootingPoint.rotation);
-        //     StartCoroutine(ShootCooldown());
-        // }
     }
-
-    // for bullets
-    // private void OnTriggerEnter2D(Collider2D hitInfo)
-    // {
-    //     Player player = hitInfo.GetComponent<Player>();
-    //     if (player != null)
-    //     {
-    //         animator.SetTrigger("attack");
-    //         Debug.Log("Player hit");
-    //         player.TakeDamage(20);
-    //     }
-    // }
-
-    // on colide with target, target takes damage
-    // public void OnCollisionEnter2D(Collision2D collision)
-    // {
-    //     if (collision.gameObject.tag == "Player" && canTakeDamage)
-    //     {
-    //         if (player != null)
-    //         {
-    //             animator.SetTrigger("attack");
-    //             playerScript.TakeDamage(enemy.damage);
-    //             StartCoroutine(ResetDamageCooldown());
-    //         }
-    //     }
-    // }
-
-    // if keeps coliiding with target, target takes damage
-    // public void OnCollisionStay2D(Collision2D collision)
-    // {
-    //     if (collision.gameObject.tag == "Player" && canTakeDamage)
-    //     {
-    //         if (player != null)
-    //         {
-    //             animator.SetTrigger("attack");
-    //             playerScript.TakeDamage(enemy.damage);
-    //             StartCoroutine(ResetDamageCooldown());
-    //         }
-    //     }
-    // }
 
     public void TakeDamage (float damage)
     {
-        Debug.Log("Enemy hit");
         enemy.speed = 0;
         enemy.health = enemy.health - damage;
         bloodSound.Play();
+        Debug.Log("Enemy hit");
         StartCoroutine(cameraShake.Shake(.15f, .15f));
         animator.SetTrigger("hit");
-        if (gameObject.tag == "bomb")
+        // if (gameObject.tag == "bomb")
+        // {
+        //     deadEnemies++;
+        //     animator.SetTrigger("attack");
+        //     if (dist <= enemy.range_attack_distance)
+        //         playerScript.TakeDamage(enemy.damage);
+        //     Invoke("DestroyObject", 1.0f);
+        //     EnemySpawner.mobCnt--;
+        // }
+        if (enemy.health <= 0 && gameObject.tag != "widow")
         {
-            animator.SetTrigger("attack");
-            if (dist <= enemy.range_attack_distance)
-                playerScript.TakeDamage(enemy.damage);
-            Invoke("DestroyObject", 1.0f);
-        }
-        else if (enemy.health <= 0)
-        {
+            statsManager.AddCoins(20);
+            levelChanger.ExperienceIncrease(30);
             animator.SetTrigger("die");
             Invoke("DestroyObject", 1.0f);
+            EnemySpawner.mobCnt--;
         }
         else
         {

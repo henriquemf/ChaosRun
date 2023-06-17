@@ -103,10 +103,10 @@ public class Player : MonoBehaviour
         animator.SetTrigger("hit");
         if (health <= 0)
         {
-            gameOverPanel.SetActive(true);
-            PauseManager.Pause();
             animator.SetTrigger("die");
             Invoke("DestroyObject", 1.0f);
+            gameOverPanel.SetActive(true);
+            PauseManager.Pause();
         }
     }
 

@@ -10,6 +10,7 @@ public class SceneLoadListener : MonoBehaviour
         if (SceneManager.GetActiveScene().buildIndex == 1)
         {
             levelChanger.ResetLevel();
+            Time.timeScale = 1;
         }
     }
 }

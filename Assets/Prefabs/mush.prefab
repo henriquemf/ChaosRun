@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 308376384, guid: 9d815c0a36aeac142a0e3ab14544dfd3, type: 3}
-  m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -117,7 +117,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 2840498702963370262}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 394c1643e9b804a4eb645466ac2d677a, type: 2}
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -169,7 +169,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   shootingPoint: {fileID: 0}
-  bulletPrefab: {fileID: 0}
   animator: {fileID: 0}
   health: 100
   shootTimeout: 8

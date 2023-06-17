@@ -11,7 +11,7 @@ public class ProgressiveRewards : MonoBehaviour
     {
         InvokeRepeating(nameof(UpdateRewardsMultiplier), 1.0f, 1.0f);
         InvokeRepeating(nameof(CoinReward), 2.0f, 2.0f);
-        InvokeRepeating(nameof(ExperienceReward), 0.8f, 0.8f);
+        InvokeRepeating(nameof(ExperienceReward), 0.5f, 0.5f);
     }
 
     private void UpdateRewardsMultiplier()

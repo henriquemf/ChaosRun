@@ -23,15 +23,27 @@ public class Bullet : MonoBehaviour
     void Update()
     {
         fireLevel = StatsManager.playerShootLevel;
-        damage = playerAttack * fireLevel;
+        damage = playerAttack * fireLevel + 1;
     }
 
     private void OnTriggerEnter2D(Collider2D hitInfo)
     {
-        Enemy enemy = hitInfo.GetComponent<Enemy>();
-        if (enemy != null)
+        // if tag is not Player, call TakeDamage
+        if (hitInfo.gameObject.tag != "Player")
         {
-            enemy.TakeDamage(damage);
+            Enemy enemy = hitInfo.GetComponent<Enemy>();
+            if (enemy != null)
+            {
+                enemy.TakeDamage(damage);
+            }
+        }
+        else if (hitInfo.gameObject.tag == "Player")
+        {
+            Player player = hitInfo.GetComponent<Player>();
+            if (player != null)
+            {
+                player.TakeDamage(damage);
+            }
         }
         Destroy(gameObject);
     }

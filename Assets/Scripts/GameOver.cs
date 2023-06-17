@@ -6,18 +6,23 @@ using TMPro;
 
 public class GameOver : MonoBehaviour
 {
-    private int runCoins;
+    public static int runCoins;
     private float runDistance;
     private int playerCoins;
     public LevelChanger levelChanger;
     public TextMeshProUGUI coinsText;
     public TextMeshProUGUI distanceText;
+    public AudioSource gameOverSound;
+    public AudioSource gameMusic;
 
     private void Start()
     {
         runCoins = StatsManager.runCoins;
         runDistance = StatsManager.runDistance;
         playerCoins = PlayerPrefs.GetInt("Coins");
+        gameOverSound.Play();
+        gameMusic.pitch = 0.5f;
+        gameMusic.volume /= 3;
 
         coinsText.text = StatsManager.FormatNumber(runCoins);
         distanceText.text = StatsManager.FormatNumber((int)runDistance) + "meters";
@@ -25,27 +30,23 @@ public class GameOver : MonoBehaviour
 
     public void ReloadGame()
     {
-        PauseManager.Resume();
         playerCoins += runCoins;
         PlayerPrefs.SetInt("Coins", playerCoins);
         PlayerPrefs.Save();
         Player.DistanceTravelled = 0;
         StatsManager.ResetStats();
         levelChanger.ResetLevel();
-        PauseManager.Resume();
         SceneManager.LoadScene(1);
     }
 
     public void LoadMenu()
     {
-        PauseManager.Resume();
         playerCoins += runCoins;
         PlayerPrefs.SetInt("Coins", playerCoins);
         PlayerPrefs.Save();
         Player.DistanceTravelled = 0;
         StatsManager.ResetStats();
         levelChanger.ResetLevel();
-        PauseManager.Resume();
         SceneManager.LoadScene(0);
     }
 
